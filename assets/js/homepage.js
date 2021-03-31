@@ -6,11 +6,20 @@ var repoSearchTerm = document.querySelector("#repo-search-term");
 
 var getUsersRepos = function (user) {
   var apiURL = "https://api.github.com/users/" + user + "/repos";
-  var response = fetch(apiURL).then(function (response) {
-    response.json().then(function (data) {
-      displayRepos(data, user);
+  fetch(apiURL)
+    .then(function (response) {
+      console.log(response.ok);
+      if (response.ok) {
+        response.json().then(function (data) {
+          displayRepos(data, user);
+        });
+      } else {
+        alert("Error: " + response.statusText);
+      }
+    })
+    .catch(function (error) {
+      alert("Unable to connect to github");
     });
-  });
 };
 
 var formSubmitHandler = function (event) {
@@ -26,6 +35,11 @@ var formSubmitHandler = function (event) {
 };
 
 var displayRepos = function (repos, searchTerm) {
+  if (repos.length === 0) {
+    repoContainerEl.textContent = "NO repositories found.";
+    return;
+  }
+
   repoContainerEl.textContent = "";
   repoSearchTerm.textContent = searchTerm;
 
