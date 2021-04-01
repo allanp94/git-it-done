@@ -1,4 +1,19 @@
 var issueContainerEl = document.getElementById("issues-container");
+var limitWarningEl = document.getElementById("limit-warning");
+var repoNameEl = document.getElementById("repo-name");
+
+var getRepoName = function () {
+  var queryString = document.location.search;
+
+  var repoName = queryString.split("=")[1];
+
+  if (repoName) {
+    repoNameEl.textContent = repoName;
+    getRepoIssues(repoName);
+  } else {
+    document.location.replace("./index.html");
+  }
+};
 
 var getRepoIssues = function (repo) {
   var apiURL =
@@ -7,9 +22,13 @@ var getRepoIssues = function (repo) {
     if (response.ok) {
       response.json().then(function (data) {
         displayIssues(data);
+
+        if (response.headers.get("Link")) {
+          displayWarning(repo);
+        }
       });
     } else {
-      alert("there was a problem with your request.!");
+      document.location.replace("./index.html");
     }
   });
 };
@@ -46,4 +65,15 @@ var displayIssues = function (issues) {
   }
 };
 
-getRepoIssues("allanp94/run-buddy-website");
+var displayWarning = function (repo) {
+  limitWarningEl.textContent = "To see more that 30 issues, ";
+
+  var linkEl = document.createElement("a");
+  linkEl.textContent = "  visit GitHub.com to see more issues.";
+  linkEl.setAttribute("href", "https://github.com/" + repo + "/issues");
+  linkEl.setAttribute("target", "_blank");
+
+  limitWarningEl.appendChild(linkEl);
+};
+
+getRepoName();
